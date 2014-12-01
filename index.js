@@ -87,21 +87,28 @@ function gte(i, y) {
   return i >= y;
 }
 
+
+var exprCommaBrace = /,.*}/;
+var exprDollarEnd = /\$$/;
+var exprNumericSeq = /^-?\d+\.\.-?\d+(?:\.\.-?\d+)?$/;
+var exprAlphaSeq = /^[a-zA-Z]\.\.[a-zA-Z](?:\.\.-?\d+)?$/;
+var exprIsOptions = /,/;
+
 function expand(str, isTop) {
   var expansions = [];
 
   var m = balanced('{', '}', str);
-  if (!m || /\$$/.test(m.pre)) return [str];
+  if (!m || exprDollarEnd.test(m.pre)) return [str];
 
-  var isNumericSequence = /^-?\d+\.\.-?\d+(?:\.\.-?\d+)?$/.test(m.body);
-  var isAlphaSequence = /^[a-zA-Z]\.\.[a-zA-Z](?:\.\.-?\d+)?$/.test(m.body);
+  var isNumericSequence = exprNumericSeq.test(m.body);
+  var isAlphaSequence = exprAlphaSeq.test(m.body);
   var isSequence = isNumericSequence || isAlphaSequence;
-  var isOptions = /^(.*,)+(.+)?$/.test(m.body);
+  var isOptions = exprIsOptions.test(m.body);
   if (!isSequence && !isOptions) {
     // {a},b}
-    if (m.post.match(/,.*}/)) {
+    if (exprCommaBrace.test(m.post)) {
       str = m.pre + '{' + m.body + escClose + m.post;
-      return expand(str);
+      return expand(str, false);
     }
     return [str];
   }
