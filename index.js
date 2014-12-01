@@ -125,9 +125,11 @@ function expand(str, isTop) {
         var post = m.post.length
           ? expand(m.post, false)
           : [''];
-        return post.map(function(p) {
-          return m.pre + n[0] + p;
-        });
+        var result = new Array(post.length);
+        for (var p = 0; p < post.length; p++) {
+          result[p] = m.pre + n[0] + post[p];
+        }
+        return result;
       }
     }
   }
@@ -182,7 +184,7 @@ function expand(str, isTop) {
       N.push(c);
     }
   } else {
-    N = concatMap(n, function(el) { return expand(el, false) });
+    N = concatMap(n, expandMap);
   }
 
   for (var j = 0; j < N.length; j++) {
@@ -196,3 +198,6 @@ function expand(str, isTop) {
   return expansions;
 }
 
+function expandMap(el) {
+  return expand(el, false);
+}
